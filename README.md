@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.svg" alt="Movie Review Sentiment Analysis" width="100%">
+</p>
+
 # Movie Review Sentiment Analysis
 
 A deep learning project that classifies movie reviews as **positive** or **negative** using a GRU-based recurrent neural network trained on the IMDB dataset. The project ships with both a command-line predictor and an interactive Streamlit web app.
@@ -30,6 +34,7 @@ A deep learning project that classifies movie reviews as **positive** or **negat
   - [Training History](#training-history)
 - [Observations](#observations)
 - [Future Improvements](#future-improvements)
+- [Contact](#contact)
 - [License](#license)
 
 ---
@@ -246,6 +251,16 @@ Training accuracy climbs above 99% by the end of epoch 5 while validation accura
 
 ---
 
+## Contact
+
+Have questions, ideas, or want to collaborate? Reach out:
+
+- **Email:** [atefkabani@gmail.com](mailto:atefkabani@gmail.com)
+- **LinkedIn:** [Atef Elkabbani](https://www.linkedin.com/in/atef-elkabbani-76734317a/)
+- **Mobile:** +966 58 307 2000
+
+---
+
 ## License
 
 This project is released under the MIT License. See [`LICENSE`](LICENSE) for details.
@@ -257,3 +272,11 @@ This project is released under the MIT License. See [`LICENSE`](LICENSE) for det
 - [IMDB Dataset of 50K Movie Reviews](https://www.kaggle.com/datasets/lakshmi25npathi/imdb-dataset-of-50k-movie-reviews) by Lakshmipathi N.
 - TensorFlow / Keras for the deep learning framework.
 - Streamlit for the rapid web UI.
+
+---
+
+<p align="center">
+  Let's build smarter sentiment models together!<br><br>
+  Thank you for visiting this project repository. Happy analyzing!<br><br>
+  <i>If you found this useful, consider giving the repo a star!</i>
+</p>
