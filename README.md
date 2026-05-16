@@ -73,6 +73,12 @@ streamlit run app.py
 
 The UI accepts a review, runs inference, and reports the predicted sentiment together with the confidence and raw probability.
 
+<p align="center">
+  <img src="assets/streamlit_app.png" alt="Streamlit app — final interface" width="600">
+  <br>
+  <em>Final interface — example prediction with confidence and probability distribution.</em>
+</p>
+
 ---
 
 ## Project Structure
