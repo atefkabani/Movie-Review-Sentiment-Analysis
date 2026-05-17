@@ -10,6 +10,7 @@ A deep learning project that classifies movie reviews as **positive** or **negat
   <img src="https://img.shields.io/badge/Python-3.9%2B-blue.svg" alt="Python">
   <img src="https://img.shields.io/badge/TensorFlow-2.x-orange.svg" alt="TensorFlow">
   <img src="https://img.shields.io/badge/Streamlit-1.30%2B-red.svg" alt="Streamlit">
+  <img src="https://img.shields.io/badge/Docker-ready-2496ED.svg?logo=docker&logoColor=white" alt="Docker">
   <img src="https://img.shields.io/badge/Accuracy-90.3%25-brightgreen.svg" alt="Accuracy">
   <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
 </p>
@@ -26,6 +27,7 @@ A deep learning project that classifies movie reviews as **positive** or **negat
 - [Usage](#usage)
   - [Command-Line Inference](#command-line-inference)
   - [Streamlit Web App](#streamlit-web-app)
+- [Run with Docker](#run-with-docker)
 - [Dataset](#dataset)
 - [Model Architecture](#model-architecture)
 - [Results](#results)
@@ -60,6 +62,7 @@ The end-to-end workflow includes:
 - Modern Streamlit UI with example reviews, configurable model/tokenizer paths, confidence metrics, and a probability bar chart.
 - Cached model loading in the web app so inference stays snappy after the first request.
 - Trained on the full IMDB dataset (50,000 labelled reviews).
+- Container-ready: ships with a `Dockerfile` for one-command deployment.
 
 ---
 
@@ -88,6 +91,8 @@ movie-review-sentiment/
 ├── app.py                  # Streamlit web app
 ├── predict.py              # Command-line prediction script
 ├── requirements.txt        # Python dependencies
+├── Dockerfile              # Container build definition
+├── .dockerignore           # Build-context excludes
 ├── dataset/
 │   └── IMDB-Dataset.csv    # IMDB reviews (not included; download separately)
 ├── models/
@@ -179,6 +184,95 @@ The sidebar lets you point the app at different model/tokenizer paths without ed
 
 ---
 
+## Run with Docker
+
+The repository ships with a `Dockerfile` that bundles the Streamlit app, the CLI predictor, and all Python dependencies into a single image — no local Python setup required.
+
+### Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) 20.10+
+- (Optional) [Docker Compose](https://docs.docker.com/compose/) for the workflow at the end
+
+### Build the image
+
+From the repository root:
+
+```bash
+docker build -t movie-review-sentiment .
+```
+
+### Run the Streamlit app
+
+```bash
+docker run --rm -p 8501:8501 --name sentiment-app movie-review-sentiment
+```
+
+Open **[http://localhost:8501](http://localhost:8501)** in your browser.
+
+### Mount your own model and dataset
+
+The trained `models/` and `dataset/` directories can be baked into the image or mounted at runtime. Mounting is recommended during development so you can swap weights without rebuilding:
+
+```bash
+docker run --rm -p 8501:8501 \
+  -v "$(pwd)/models:/app/models" \
+  -v "$(pwd)/dataset:/app/dataset" \
+  movie-review-sentiment
+```
+
+> On Windows PowerShell, replace `$(pwd)` with `${PWD}`.
+
+### Run the CLI predictor instead
+
+Override the default `CMD` to run `predict.py`:
+
+```bash
+docker run --rm movie-review-sentiment \
+  python predict.py --review "Absolutely brilliant from start to finish."
+```
+
+### Docker Compose (optional)
+
+Create a `docker-compose.yml` if you'd rather not remember the flags:
+
+```yaml
+services:
+  app:
+    build: .
+    image: movie-review-sentiment
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./models:/app/models
+      - ./dataset:/app/dataset
+    restart: unless-stopped
+```
+
+Then:
+
+```bash
+docker compose up --build
+```
+
+### Troubleshooting
+
+| Symptom                                                    | Likely cause                                                                         | Fix                                                                                                                       |
+|------------------------------------------------------------|--------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| `FileNotFoundError: 'models/gru_imdb.keras'`               | The `models/` folder is listed in `.dockerignore`, so `COPY . .` skipped it.         | Remove `models/` (or `*.keras`, `*.pkl`) from `.dockerignore` and rebuild, **or** mount the folder with `-v` (see above). |
+| `FileNotFoundError: 'dataset/IMDB-Dataset.csv'`            | Same issue for the dataset folder.                                                   | Same fix — un-ignore the folder or mount it at runtime.                                                                   |
+| Port 8501 already in use                                   | Another service (often a previous container) is bound to 8501.                       | Run on a different host port: `-p 8502:8501`.                                                                             |
+| Container starts but Streamlit is unreachable              | Streamlit defaulted to `localhost` inside the container.                             | Confirm the `CMD` uses `--server.address=0.0.0.0` (the bundled `Dockerfile` already does this).                           |
+
+### Inspect what's inside the image
+
+Useful when debugging missing files:
+
+```bash
+docker run --rm movie-review-sentiment ls -la /app /app/models /app/dataset
+```
+
+---
+
 ## Dataset
 
 The model is trained on the **IMDB Movie Reviews dataset**, a balanced corpus of 50,000 reviews split evenly into positive and negative classes. Common preprocessing steps applied before training include lowercasing, basic punctuation cleanup, tokenization with the Keras `Tokenizer`, and padding/truncation to a fixed length.
@@ -252,7 +346,6 @@ Training accuracy climbs above 99% by the end of epoch 5 while validation accura
 - Experiment with bidirectional GRU/LSTM layers.
 - Fine-tune a pretrained transformer (e.g., DistilBERT) and compare against the GRU baseline.
 - Add a batch evaluation mode to the CLI that consumes the `--csv` flag and reports full metrics.
-- Containerise the Streamlit app with Docker for one-command deployment.
 - Deploy to Streamlit Community Cloud or Hugging Face Spaces for a public demo.
 
 ---
